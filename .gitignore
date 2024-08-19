@@ -3,7 +3,10 @@
 *.sif
 .pytest_cache
 __pycache__
-storage
+storage/processed/*
+storage/cache/*
+storage/external/joern-cli/*
+storage/external/MSR_data_cleaned.csv
 *.egg-info
 output
 .vscode/sftp.json

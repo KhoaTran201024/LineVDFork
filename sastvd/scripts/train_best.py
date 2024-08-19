@@ -15,7 +15,7 @@ os.environ['RAY_memory_usage_threshold'] = '0.9'
 # Disable worker killing by setting the refresh interval to zero
 os.environ['RAY_memory_monitor_refresh_ms'] = '0'
 
-ray.init(num_cpus=8, num_gpus=0)
+ray.init(num_cpus=8, num_gpus=1)
 config = {
     "hfeat": tune.choice([512]),
     "embtype": tune.choice(["codebert"]),
@@ -42,7 +42,7 @@ trainable = tune.with_parameters(
 
 analysis = tune.run(
     trainable,
-    resources_per_trial={"cpu": 6, "gpu": 0},
+    resources_per_trial={"cpu": 2, "gpu": 0.5},
     metric="val_loss",
     mode="min",
     config=config,
@@ -54,3 +54,4 @@ analysis = tune.run(
     storage_path=sp,#fix bug here
     max_concurrent_trials=1#add this to prevent something
 )
+
