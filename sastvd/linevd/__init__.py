@@ -253,8 +253,8 @@ class BigVulDatasetLineVDDataModule(pl.LightningDataModule):
             g,
             g.nodes(),
             sampler,
-            batch_size=self.batch_size,
-            #batch_size=32,
+            #batch_size=self.batch_size,
+            batch_size=32,
             shuffle=shuffle,
             drop_last=False,
             num_workers=1,
@@ -341,6 +341,7 @@ class LitGNN(pl.LightningModule):
         else:
             print("else LOSSSSSSSSSSSSSSSSSS")
             weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32).cuda()
+            #weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32)
             self.loss = th.nn.CrossEntropyLoss(
                 weight=weight_tensor
                 #weight=th.tensor([1, self.hparams.stmtweight])
@@ -421,8 +422,8 @@ class LitGNN(pl.LightningModule):
         self.lstm = th.nn.LSTM(
             input_size=self.hparams.embfeat,
             hidden_size=self.hparams.hfeat,
-            num_layers=2,
-            dropout=lstm_dropout,
+            num_layers=self.hparams.lstm_layers,
+            dropout=self.hparams.lstm_dropout,
             batch_first=True
         )
         print("LINE 428 INIT LSTM")
@@ -674,8 +675,8 @@ class LitGNN(pl.LightningModule):
         """Calculate metrics for whole test set."""
         all_pred = th.empty((0, 2)).long().cuda()
         all_true = th.empty((0)).long().cuda()
-        # all_pred = th.empty((0, 2)).long()
-        # all_true = th.empty((0)).long()
+        #all_pred = th.empty((0, 2)).long()
+        #all_true = th.empty((0)).long()
         all_pred_f = []
         all_true_f = []
         all_funcs = []
