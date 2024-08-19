@@ -1,0 +1,44 @@
+tqdm>=4.61.2
+numpy>=1.20.1
+jupyterlab
+gdown
+matplotlib
+gensim
+joblib
+lightgbm
+xgboost
+nltk
+seaborn
+pytest
+scikit-learn
+scipy
+pandas
+fastparquet
+spacy
+imbalanced-learn
+dgl
+networkx
+pydot
+graphviz
+python-Levenshtein
+tensorboard
+python-igraph
+unidiff
+fuzzywuzzy
+python-Levenshtein
+libclang
+pandarallel
+ipywidgets
+transformers
+torch==2.1.0
+torchtext==0.16.0      # Check for the compatible version
+torchsummary==1.5.1    # Check for the compatible version
+torchinfo==1.9.0       # Check for the compatible version
+tsne_torch==0.1.0      # Check for the compatible version
+pytorch-lightning==2.0.0  # Check for the compatible version
+torch-scatter==2.1.0   # Check for the compatible versions
+ujson
+unidecode
+ray[tune]
+
+
