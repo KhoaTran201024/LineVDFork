@@ -254,7 +254,7 @@ class BigVulDatasetLineVDDataModule(pl.LightningDataModule):
             g.nodes(),
             sampler,
             #batch_size=self.batch_size,
-            batch_size=32,
+            batch_size=128,
             shuffle=shuffle,
             drop_last=False,
             num_workers=1,
@@ -340,8 +340,8 @@ class LitGNN(pl.LightningModule):
             self.loss_f = th.nn.CrossEntropyLoss()
         else:
             print("else LOSSSSSSSSSSSSSSSSSS")
-            #weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32).cuda()
-            weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32)
+            weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32).cuda()
+            #weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32)
             self.loss = th.nn.CrossEntropyLoss(
                 weight=weight_tensor
                 #weight=th.tensor([1, self.hparams.stmtweight])
@@ -673,10 +673,10 @@ class LitGNN(pl.LightningModule):
     def test_epoch_end(self, outputs):
         print("TEST EPOCH END IN LITGNN")
         """Calculate metrics for whole test set."""
-        #all_pred = th.empty((0, 2)).long().cuda()
-        #all_true = th.empty((0)).long().cuda()
-        all_pred = th.empty((0, 2)).long()
-        all_true = th.empty((0)).long()
+        all_pred = th.empty((0, 2)).long().cuda()
+        all_true = th.empty((0)).long().cuda()
+        # all_pred = th.empty((0, 2)).long()
+        # all_true = th.empty((0)).long()
         all_pred_f = []
         all_true_f = []
         all_funcs = []
@@ -690,14 +690,14 @@ class LitGNN(pl.LightningModule):
                 all_true_f += out[1]
                 for idx, g in enumerate(out[2]):
                     all_true = th.cat([all_true, g.ndata["_VULN"]])
-                    #gnnelogits = th.zeros((g.number_of_nodes(), 2), device="cuda")
-                    gnnelogits = th.zeros((g.number_of_nodes(), 2),)
+                    gnnelogits = th.zeros((g.number_of_nodes(), 2), device="cuda")
+                    #gnnelogits = th.zeros((g.number_of_nodes(), 2),)
                     gnnelogits[:, 0] = 1
                     if out[1][idx] == 1:
-                        # zeros = th.zeros(g.number_of_nodes(), device="cuda")
-                        # importance = th.ones(g.number_of_nodes(), device="cuda")
-                        zeros = th.zeros(g.number_of_nodes())
-                        importance = th.ones(g.number_of_nodes())
+                        zeros = th.zeros(g.number_of_nodes(), device="cuda")
+                        importance = th.ones(g.number_of_nodes(), device="cuda")
+                        #zeros = th.zeros(g.number_of_nodes())
+                        #importance = th.ones(g.number_of_nodes())
                         try:
                             if out[1][idx] == 1:
                                 importance = lvdgne.get_node_importances(self, g)

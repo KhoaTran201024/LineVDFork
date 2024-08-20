@@ -59,7 +59,8 @@ def train_linevd(                                   #fix some bugs here
     #lastest version update
     trainer = pl.Trainer(
         #devices=0,  # Use 'devices' in newer versions, set to '0' for CPU
-        accelerator="cpu",  # Explicitly specify using CPU
+        devices=2, 
+        accelerator="auto",  # auto choose cpu or gpu
         #auto_lr_find=False,
         default_root_dir=savepath,
         num_sanity_val_steps=0,
