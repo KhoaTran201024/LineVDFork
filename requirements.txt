@@ -16,7 +16,7 @@ pandas==2.2.2
 fastparquet==2024.5.0
 spacy==3.7.5
 imbalanced-learn==0.12.3
-dgl==2.1.0
+dgl
 networkx
 pydot==3.0.1
 graphviz
@@ -30,13 +30,13 @@ libclang==18.1.1
 pandarallel==1.6.5
 ipywidgets==8.1.3
 transformers==4.43.4
-torch==2.1.0
-torchtext==0.16.0    # Check for the compatible version
+torch==2.2.0
+torchtext   # Check for the compatible version
 torchsummary==1.5.1    # Check for the compatible version
 torchinfo==1.8.0     # Check for the compatible version
-tsne_torch==0.1.0      # Check for the compatible version
+tsne_torch      # Check for the compatible version
 pytorch-lightning==2.3.3 # Check for the compatible version
-torch-scatter==2.1.2   # Check for the compatible versions
+#torch-scatter==2.1.1 -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 ujson==5.10.0
 Unidecode==1.3.8
 ray[tune]

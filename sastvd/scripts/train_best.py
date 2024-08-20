@@ -1,6 +1,8 @@
 import os
 import ray
-import sastvd as svd
+import sys
+sys.path.append('')
+import sastvd
 import sastvd.linevd.run as lvdrun
 from ray import tune
 
@@ -15,7 +17,7 @@ os.environ['RAY_memory_usage_threshold'] = '0.9'
 # Disable worker killing by setting the refresh interval to zero
 os.environ['RAY_memory_monitor_refresh_ms'] = '0'
 
-ray.init(num_cpus=8, num_gpus=1)
+ray.init(num_cpus=8, num_gpus=0)
 config = {
     "hfeat": tune.choice([512]),
     "embtype": tune.choice(["codebert"]),
@@ -34,15 +36,15 @@ config = {
 }
 
 samplesz = -1
-run_id = svd.get_run_id()
-sp = svd.get_dir(svd.processed_dir() / f"raytune_best_{samplesz}" / run_id)
+run_id = sastvd.get_run_id()
+sp = sastvd.get_dir(sastvd.processed_dir() / f"raytune_best_{samplesz}" / run_id)
 trainable = tune.with_parameters(
-    lvdrun.train_linevd, max_epochs=20, samplesz=samplesz, savepath=sp
+    lvdrun.train_linevd, max_epochs=1, samplesz=samplesz, savepath=sp
 )
 
 analysis = tune.run(
     trainable,
-    resources_per_trial={"cpu": 2, "gpu": 0.5},
+    resources_per_trial={"cpu": 6, "gpu": 0},
     metric="val_loss",
     mode="min",
     config=config,
