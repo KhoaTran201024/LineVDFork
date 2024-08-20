@@ -3,8 +3,8 @@
 # Virtual environment setup
 
 ```python
-python3 -m venv **venv**
-source **venv**/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 # Install packages
@@ -25,13 +25,12 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 
 After unzip the storage directory looks like the below image:
 
-![image.png](.\media\image.png)
+![image.png](./media/image.png)
 
-[https://www.notion.so](https://www.notion.so)
 
 The cache directory looks like this:
 
-![image.png](.\media\image_1.png)
+![image.png](./media/image_1.png)
 
 # Training model
 
