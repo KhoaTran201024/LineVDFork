@@ -39,7 +39,7 @@ Notice there are some error in this step like the python ***can not identify cus
 The solution is to open terminal and **activate virtual environment again**
 
 ```python
-source **venv**/bin/activate
+source venv/bin/activate
 ```
 
 Change to the running directory:
