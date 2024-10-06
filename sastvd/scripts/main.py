@@ -6,20 +6,20 @@ import sastvd
 import sastvd.linevd.run as lvdrun
 from ray import tune
 
-def main():
-    #------------------------------comment the below line----------------------------------------------
-    #os.environ["SLURM_JOB_NAME"] = "bash"
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
-    #os.environ["TUNE_WARN_EXCESSIVE_EXPERIMENT_CHECKPOINT_SYNC_THRESHOLD_S"]="" #add to suppress the warning
 
-    # Adjust the memory usage threshold (e.g., set to 90%)
-    os.environ['RAY_memory_usage_threshold'] = '0.9'
+#------------------------------comment the below line----------------------------------------------
+#os.environ["SLURM_JOB_NAME"] = "bash"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+#os.environ["TUNE_WARN_EXCESSIVE_EXPERIMENT_CHECKPOINT_SYNC_THRESHOLD_S"]="" #add to suppress the warning
 
-    # Disable worker killing by setting the refresh interval to zero
-    os.environ['RAY_memory_monitor_refresh_ms'] = '0'
+# Adjust the memory usage threshold (e.g., set to 90%)
+os.environ['RAY_memory_usage_threshold'] = '0.95'
 
-    ray.init(num_cpus=8, num_gpus=1)
-    config = {
+# Disable worker killing by setting the refresh interval to zero
+os.environ['RAY_memory_monitor_refresh_ms'] = '60000'
+
+ray.init(num_cpus=8, num_gpus=1)
+config = {
         "hfeat": tune.choice([512]),
         "embtype": tune.choice(["codebert"]),
         "stmtweight": tune.choice([1]),
@@ -30,22 +30,22 @@ def main():
         "loss": tune.choice(["ce"]),
         "scea": tune.choice([0.5]),
         "gtype": tune.choice(["pdg+raw"]),
-        "batch_size": tune.choice([32]),
+        "batch_size": tune.choice([128]),
         "multitask": tune.choice(["linemethod"]),
         "splits": tune.choice(["default"]),
-        "lr": tune.choice([1e-3]),#
-    }
+        "lr": tune.choice([1e-3]),
+}
 
-    samplesz = -1
-    run_id = sastvd.get_run_id()
-    sp = sastvd.get_dir(sastvd.processed_dir() / f"raytune_best_{samplesz}" / run_id)
-    trainable = tune.with_parameters(
+samplesz = -1
+run_id = sastvd.get_run_id()
+sp = sastvd.get_dir(sastvd.processed_dir() / f"raytune_best_{samplesz}" / run_id)
+trainable = tune.with_parameters(
         lvdrun.train_linevd, max_epochs=20, samplesz=samplesz, savepath=sp
-    )
+)
 
-    analysis = tune.run(
+analysis = tune.run(
         trainable,
-        resources_per_trial={"cpu": 3, "gpu": 0.5},
+        resources_per_trial={"cpu": 6, "gpu": 0.5},
         metric="val_loss",
         mode="min",
         config=config,
@@ -56,10 +56,4 @@ def main():
         checkpoint_score_attr="min-val_loss",
         storage_path=sp,#fix bug here
         max_concurrent_trials=1#add this to prevent something
-    )
-    return analysis
-
-
-if __name__ == "__main__":
-    analysis=main()
-    print(analysis)
+)
