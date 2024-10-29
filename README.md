@@ -49,5 +49,5 @@ cd sastvd/scripts
 ```
 
 ```python
-python main.py
+python sastvd/scripts/main.py
 ```

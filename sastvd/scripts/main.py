@@ -18,7 +18,7 @@ os.environ['RAY_memory_usage_threshold'] = '0.95'
 # Disable worker killing by setting the refresh interval to zero
 os.environ['RAY_memory_monitor_refresh_ms'] = '60000'
 
-ray.init(num_cpus=8, num_gpus=1)
+ray.init(num_cpus=8, num_gpus=0, runtime_emv = {"env_vars":{"PL_DISABLE_FORK":"1"}})
 config = {
         "hfeat": tune.choice([512]),
         "embtype": tune.choice(["codebert"]),
