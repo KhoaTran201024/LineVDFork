@@ -1,7 +1,7 @@
 """Main code for training. Probably needs refactoring."""
 import os
 from glob import glob
-import csv
+
 import dgl
 import pandas as pd
 import pytorch_lightning as pl
@@ -25,9 +25,7 @@ from dgl.dataloading import GraphDataLoader
 from dgl.nn.pytorch import GATConv, GraphConv
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-from torchxlstm import sLSTM, mLSTM, xLSTM
-from torchmetrics import F1Score, Precision, Recall
+from torchxlstm import sLSTM, mLSTM, xLSTM 
 from sklearn.metrics import (
     accuracy_score,
     average_precision_score,
@@ -40,8 +38,6 @@ from sklearn.metrics import (
     roc_auc_score,
     auc
 )
-from sklearn.ensemble import RandomForestClassifier
-
 def ne_groupnodes(n, e):
     """Group nodes with same line number."""
     nl = n[n.lineNumber != ""].copy()
@@ -244,10 +240,10 @@ class BigVulDatasetLineVDDataModule(pl.LightningDataModule):
         self.test = BigVulDatasetLineVD(partition="test", **dataargs)
         self.train = BigVulDatasetLineVD(partition="train", **dataargs)
         self.val = BigVulDatasetLineVD(partition="val", **dataargs)
-
-        print(f'train set = %v',len(self.train))
-        print(f'test set = %v',len(self.test))
-        print(f'validate set = %v',len(self.val))
+        
+        #print(f'train set = %v',self.train)
+        #print(f'test set = %v',self.test)
+        #print(f'validate set = %v',self.validate)
         print("Line 236 bigvul dataset linevd data module")
         codebert = cb.CodeBert()
         self.train.cache_codebert_method_level(codebert)
@@ -269,7 +265,7 @@ class BigVulDatasetLineVDDataModule(pl.LightningDataModule):
             g.nodes(),
             sampler,
             #batch_size=self.batch_size,
-            batch_size=128,
+            batch_size=32,
             shuffle=shuffle,
             drop_last=False,
             num_workers=1,
@@ -301,7 +297,7 @@ class BigVulDatasetLineVDDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         print("VAL TEST DATA LOADER DATASET BIGVUL")
         """Return test dataloader."""
-        return GraphDataLoader(self.test, batch_size=128)
+        return GraphDataLoader(self.test, batch_size=32)
 
 
 # %%
@@ -336,16 +332,7 @@ class LitGNN(pl.LightningModule):
         self.lr = lr
         self.random = random
         self.save_hyperparameters()
-        
-        self.f1_line = F1Score(num_classes=2,task='binary')
-        self.precision_line = Precision(num_classes=2,task='binary')
-        self.recall_line = Recall(num_classes=2,task='binary')
 
-        self.f1_method = F1Score(num_classes=2,task='binary')
-        self.precision_method = Precision(num_classes=2,task='binary')
-        self.recall_method = Recall(num_classes=2,task='binary')
-
- 
         # Set params based on embedding type
         if self.hparams.embtype == "codebert":
             self.hparams.embfeat = 768
@@ -357,18 +344,17 @@ class LitGNN(pl.LightningModule):
             self.hparams.embfeat = 300
             self.EMBED = "_DOC2VEC"
 
+        # Loss
         #SAVE OUTPUT OF TEST PART
         self.test_output = []
-
-        # Loss
         if self.hparams.loss == "sce":
             print("SSSSSCCCCCEEEE")
             self.loss = svdloss.SCELoss(self.hparams.scea, 1 - self.hparams.scea)
             self.loss_f = th.nn.CrossEntropyLoss()
         else:
             print("else LOSSSSSSSSSSSSSSSSSS")
-            weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32).cuda()
-            #weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32)
+            #weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32).cuda()
+            weight_tensor = th.tensor([1.0, self.hparams.stmtweight], dtype=th.float32)
             self.loss = th.nn.CrossEntropyLoss(
                 weight=weight_tensor
                 #weight=th.tensor([1, self.hparams.stmtweight])
@@ -430,7 +416,7 @@ class LitGNN(pl.LightningModule):
         if "+femb" in self.hparams.model:
             print("ENTER +FEMB")
             self.fc_femb = th.nn.Linear(embfeat * 2, self.hparams.hfeat)
-
+ 
         # self.resrgat = ResRGAT(hdim=768, rdim=1, numlayers=1, dropout=0)
         # self.gcn = GraphConv(embfeat, hfeat)
         # self.gcn2 = GraphConv(hfeat, hfeat)
@@ -439,32 +425,28 @@ class LitGNN(pl.LightningModule):
         self.codebertfc = th.nn.Linear(768, self.hparams.hfeat)
 
         # Hidden Layers
-        #self.fch = []
-        #for _ in range(8):
-        #   self.fch.append(th.nn.Linear(self.hparams.hfeat, self.hparams.hfeat))
-        #self.hidden = th.nn.ModuleList(self.fch)
-        #self.hdropout = th.nn.Dropout(self.hparams.hdropout)
-        #self.fc2 = th.nn.Linear(self.hparams.hfeat, 2)
-        #print("line 420 init LSTM")
-        #self.lstm = th.nn.LSTM(
-        #    input_size=self.hparams.hfeat,
-        #    hidden_size=self.hparams.hfeat,
-        #    num_layers=3,
-        #    dropout=0.4,
-        #    batch_first=True
-        #)
-        print("LINE 428 INIT LSTM")
-        #self.xlstm = xLSTM(hfeat, 64, 4, batch_first=True, layers='msm')
-        #self.lstm_dropout = th.nn.Dropout(self.hparams.mlpdropout)
-        #self.lstm_dropout = th.nn.Dropout(0.4)
-        #print("LINE 430 INIT LSTM")
-         
-        #self.fc2 = th.nn.Linear(self.hparams.hfeat, 2)  # Output dimension for classification
-        print("LINE 431 INIT LSTM")
-        self.random_forest = RandomForestClassifier(
-            n_estimators=100,
-            max_depth=None,
-        )
+        self.fch = []
+        for _ in range(8):
+            self.fch.append(th.nn.Linear(self.hparams.hfeat, self.hparams.hfeat))
+        self.hidden = th.nn.ModuleList(self.fch)
+        self.hdropout = th.nn.Dropout(self.hparams.hdropout)
+        self.fc2 = th.nn.Linear(self.hparams.hfeat, 2)
+        print("line 420 init LSTM")
+        # self.lstm = th.nn.LSTM(
+        #     input_size=self.hparams.embfeat,
+        #     hidden_size=self.hparams.hfeat,
+        #     num_layers=self.hparams.lstm_layers,
+        #     dropout=self.hparams.lstm_dropout,
+        #     batch_first=True
+        # )
+        # self.xlstm = xLSTM(hfeat, 32, 2, batch_first=True, layers='msm')
+        # print("LINE 428 INIT LSTM")
+        # #self.lstm_dropout = th.nn.Dropout(self.hparams.mlpdropout)
+        # self.lstm_dropout = th.nn.Dropout(0.2)
+        # print("LINE 430 INIT LSTM")
+        # self.fc2 = th.nn.Linear(self.hparams.hfeat, 2)  # Output dimension for classification\
+        # print("LINE 431 INIT LSTM")
+        
 
     def forward(self, g, test=False, e_weights=[], feat_override=""):
         """Forward pass.
@@ -552,37 +534,31 @@ class LitGNN(pl.LightningModule):
             h_func = self.mlpdropout(F.elu(self.fconly(h_func)))
             print("LINE 534 INIT.PY")
 
-        #Hidden layers
-        #for idx, hlayer in enumerate(self.hidden):
-        #    h = self.hdropout(F.elu(hlayer(h)))
-        #    h_func = self.hdropout(F.elu(hlayer(h_func)))
+        # Hidden layers
+        for idx, hlayer in enumerate(self.hidden):
+            h = self.hdropout(F.elu(hlayer(h)))
+            h_func = self.hdropout(F.elu(hlayer(h_func)))
+        # Ensure correct shape for LSTM (batch, seq_len, features)
+        # '''Handling with LSTM'''
+        # h = h.unsqueeze(1)  # Add sequence dimension
+        # h_func = h_func.unsqueeze(1)  # Add sequence dimension
 
-        #Ensure correct shape for LSTM (batch, seq_len, features)
-        '''Handling with xLSTM'''
-        #h = h.unsqueeze(1)  # Add sequence dimension
-        #h_func = h_func.unsqueeze(1)  # Add sequence dimension
-        #print("after seq_len = 16")
-        #h = h.expand(-1, 16, -1)
-        #h_func = h_func.expand(-1, 16, -1)
-        #print("ENTER LINE 527 LSTM PROCESS FORWARD")
-        #Process with LSTM
-        #h, _ = self.lstm(h)
-        #h_func, _ = self.lstm(h_func)
-        #print("ENTER LINE 531 LSTM PROCESS FORWARD")
-        # Apply dropout after LSTM
-        #h = self.lstm_dropout(h)
-        #h_func = self.lstm_dropout(h_func)
-        print("ENTER LINE 535 LSTM PROCESS FORWARD")
-        # Use the last output of LSTM for classification
-        #h = h[:, -1]  # Use the last timestep
-        #h_func = h_func[:, -1]  # Use the last timestep
-        #print("ENTER LINE 539 LSTM PROCESS FORWARD")
-        
-        
-        # Classification layer
-	#print("FIT MODEL h,h_func")
-        h = self.random_forest(h)
-        h_func = self.random_forest(
+        # print("ENTER LINE 527 LSTM PROCESS FORWARD")
+        # # Process with LSTM
+        # h, _ = self.xlstm(h)
+        # h_func, _ = self.xlstm(h_func)
+        # print("ENTER LINE 531 LSTM PROCESS FORWARD")
+        # # Apply dropout after LSTM
+        # h = self.lstm_dropout(h)
+        # h_func = self.lstm_dropout(h_func)
+        # print("ENTER LINE 535 LSTM PROCESS FORWARD")
+        # # Use the last output of LSTM for classification
+        # h = h[:, -1]  # Use the last timestep
+        # h_func = h_func[:, -1]  # Use the last timestep
+        # print("ENTER LINE 539 LSTM PROCESS FORWARD")
+        # # Classification layer
+        h = self.fc2(h)
+        h_func = self.fc2(
             h_func
         )  # Share weights between method-level and statement-level tasks
         print("YOU'RE SAFETY")
@@ -645,13 +621,13 @@ class LitGNN(pl.LightningModule):
         print("Line 568")
         self.log("train_loss", loss, on_epoch=True, prog_bar=True, logger=True)
         print("LINE 570")
-        self.log("train_acc", acc, on_epoch=True, prog_bar=True, logger=True)
+        self.log("train_acc", acc, prog_bar=True, logger=True)
         print("LINE 572")
         if not self.hparams.methodlevel:
             print("LINE 574")
-            self.log("train_acc_func", acc_func, on_epoch=True, prog_bar=True, logger=True)
+            self.log("train_acc_func", acc_func, prog_bar=True, logger=True)
         print("LINE 576")
-        self.log("train_mcc", mcc, on_epoch=True, prog_bar=True, logger=True)
+        self.log("train_mcc", mcc, prog_bar=True, logger=True)
         print("LINE 574")
         return loss
 
@@ -674,14 +650,13 @@ class LitGNN(pl.LightningModule):
 
         self.log("val_loss", loss, on_step=True, prog_bar=True, logger=True)
         self.auroc.update(logits[:, 1], labels)
-        self.log("val_auroc", self.auroc,on_epoch=True, prog_bar=True, logger=True)
-        self.log("val_acc", acc, on_epoch=True, prog_bar=True, logger=True)
-        self.log("val_mcc", mcc, on_epoch=True, prog_bar=True, logger=True)
+        self.log("val_auroc", self.auroc, prog_bar=True, logger=True)
+        self.log("val_acc", acc, prog_bar=True, logger=True)
+        self.log("val_mcc", mcc, prog_bar=True, logger=True)
         return loss
 
     def test_step(self, batch, batch_idx):
         print("TEST STEP IN LIT GNN")
-        #self.log('test_step_message', "Reached test_step")
         """Test step."""
         logits, labels, _ = self.shared_step(
             batch, True
@@ -689,9 +664,8 @@ class LitGNN(pl.LightningModule):
 
         if self.hparams.methodlevel:
             labels_f = labels
-            self.test_output = logits[0], labels_f, dgl.unbatch(batch)
             return logits[0], labels_f, dgl.unbatch(batch)
-        print("method level false")
+
         batch.ndata["pred"] = F.softmax(logits[0], dim=1)
         batch.ndata["pred_func"] = F.softmax(logits[1], dim=1)
         logits_f = []
@@ -703,21 +677,17 @@ class LitGNN(pl.LightningModule):
                     list(i.ndata["pred"].detach().cpu().numpy()),
                     list(i.ndata["_VULN"].detach().cpu().numpy()),
                     i.ndata["pred_func"].argmax(1).detach().cpu(),
-                    list(i.ndata["_LINE"].detach().cpu().numpy()),                ]
+                    list(i.ndata["_LINE"].detach().cpu().numpy()),
+                ]
             )
             logits_f.append(dgl.mean_nodes(i, "pred_func").detach().cpu())
             labels_f.append(dgl.mean_nodes(i, "_FVULN").detach().cpu())
-        #self.test_output = ([logits[0], logits_f], [labels, labels_f], preds)
         self.test_output.append(logits[0])
         self.test_output.append(logits_f)
         self.test_output.append(labels)
         self.test_output.append(labels_f)
         self.test_output.append(preds)
         print(len(self.test_output))
-        #line_f1 = self.f1_line(logits[0], labels)
-        #line_precision = self.precision_line(logits[0], labels)
-        #line_recall = self.recall_line(logits[0], labels)
-
         return [logits[0], logits_f], [labels, labels_f], preds
 
     def on_test_epoch_end(self):
@@ -732,10 +702,10 @@ class LitGNN(pl.LightningModule):
         #    for i in out:
         #        print(type(i))
 
-        all_pred = th.empty((0,2)).long().cuda()
-        all_true = th.empty((0)).long().cuda()
-        #all_pred = th.empty((0)).long()
-        #all_true = th.empty((0)).long()
+        # all_pred = th.empty((0,2)).long().cuda()
+        # all_true = th.empty((0)).long().cuda()
+        all_pred = th.empty((0)).long()
+        all_true = th.empty((0)).long()
         all_pred_f = []
         print(all_pred_f)
         all_true_f = []
@@ -752,14 +722,14 @@ class LitGNN(pl.LightningModule):
                 all_true_f += out[1]
                 for idx, g in enumerate(out[2]):
                     all_true = th.cat([all_true, g.ndata["_VULN"]])
-                    gnnelogits = th.zeros((g.number_of_nodes(), 2), device="cuda")
-                    #gnnelogits = th.zeros((g.number_of_nodes(), 2),)
+                    #gnnelogits = th.zeros((g.number_of_nodes(), 2), device="cuda")
+                    gnnelogits = th.zeros((g.number_of_nodes(), 2),)
                     gnnelogits[:, 0] = 1
                     if out[1][idx] == 1:
-                        zeros = th.zeros(g.number_of_nodes(), device="cuda")
-                        importance = th.ones(g.number_of_nodes(), device="cuda")
-                        #zeros = th.zeros(g.number_of_nodes())
-                        #importance = th.ones(g.number_of_nodes())
+                        # zeros = th.zeros(g.number_of_nodes(), device="cuda")
+                        # importance = th.ones(g.number_of_nodes(), device="cuda")
+                        zeros = th.zeros(g.number_of_nodes())
+                        importance = th.ones(g.number_of_nodes())
                         try:
                             if out[1][idx] == 1:
                                 importance = lvdgne.get_node_importances(self, g)
@@ -782,14 +752,16 @@ class LitGNN(pl.LightningModule):
             #for out in outputs:
             #print(outputs[0].shape)
             #print(outputs[1].shape)
-            all_pred = th.cat([all_pred, outputs[0].to("cuda")])
-            all_true = th.cat([all_true, outputs[2].to("cuda")])
-          
+            #all_pred = th.cat([all_pred, outputs[0].to("cuda")])
+            #all_true = th.cat([all_true, outputs[2].to("cuda")])
+            all_pred = th.cat([all_pred, outputs[0]])
+            all_true = th.cat([all_true, outputs[2]])
+
             all_pred_f += outputs[1]
             all_true_f += outputs[3]
             all_funcs += outputs[4]
-        
-    
+
+        metrics_df = pd.DataFrame(columns=["f1", "precision", "recall", "accuracy","auc","mat_score","pr_auc_m_line"])
         all_pred = F.softmax(all_pred, dim=1)
         all_pred_f = F.softmax(th.stack(all_pred_f).squeeze(), dim=1)
         all_true_f = th.stack(all_true_f).squeeze().long()
@@ -798,16 +770,14 @@ class LitGNN(pl.LightningModule):
         self.all_pred = all_pred
         self.all_pred_f = all_pred_f
         self.all_true_f = all_true_f
-        
 
-        
+
         all_pred = all_pred.cpu().numpy()
         all_true = all_true.cpu().numpy()
         precision_l, recall_l, thresholds_l = precision_recall_curve(all_true, all_pred[:,1])
         pr_auc_l = auc(recall_l, precision_l)
         best_f1_l = ml.best_f1(all_true, [i[1] for i in all_pred])
         pred_l = [1 if i > best_f1_l else 0 for i in all_pred[:,1]]
-        
         #get metrics from the line level
         line_f1 = f1_score(all_true, pred_l)
         line_precision = precision_score(all_true, pred_l)
@@ -816,7 +786,7 @@ class LitGNN(pl.LightningModule):
         line_auc_score = roc_auc_score(all_true, pred_l)
         line_mat_score = matthews_corrcoef(all_true, pred_l)
 
-        
+
         #print(line)
         print(line_f1)
         print(line_precision)
@@ -829,7 +799,15 @@ class LitGNN(pl.LightningModule):
         self.log("5_test_acu_line", line_auc_score, on_epoch=True, prog_bar=True, logger=True)
         self.log("6_test_mat_line", line_mat_score, on_epoch=True, prog_bar=True, logger=True)
         self.log("7_pr_auc_l_line", pr_auc_l, on_epoch=True, prog_bar=True, logger=True)
-
+        new_row_line = {
+            "f1":line_f1,
+            "precision":line_precision,
+            "recall":line_recall,
+            "accuracy":line_acc,
+            "auc":line_auc_score,
+            "mat_score":line_mat_score,
+            "pr_auc_m_line":pr_auc_l
+        }
         all_pred_f = all_pred_f.cpu().numpy()
         all_true_f = all_true_f.cpu().numpy()
         precision_f, recall_f, thresholds_f = precision_recall_curve(all_true_f, all_pred_f[:,1])
@@ -845,7 +823,15 @@ class LitGNN(pl.LightningModule):
         method_acc = accuracy_score(all_true_f, pred_f)
         method_auc_score = roc_auc_score(all_true_f, pred_f)
         method_mat_score = matthews_corrcoef(all_true_f, pred_f)
-
+        new_row_method = {
+            "f1":method_f1,
+            "precision":method_precision,
+            "recall":method_recall,
+            "accuracy":method_acc,
+            "auc":method_auc_score,
+            "mat_score":method_mat_score,
+            "pr_auc_m_line":pr_auc_f
+        }
         #print(method_f1)
         #print(method_precision)
         #print(method_recall)
@@ -904,15 +890,18 @@ class LitGNN(pl.LightningModule):
         self.linevd_pred = multitask_pred
         self.linevd_true = multitask_true
         #self.plot_pr_curve()
-        multitask_true = th.LongTensor(multitask_true)
-        multitask_pred = th.Tensor(multitask_pred)
+        multitask_true = [int(x) for x in multitask_true]  # Convert float labels to int
+        multitask_true = th.LongTensor(multitask_true).cpu()
+        multitask_pred = th.Tensor(multitask_pred).cpu()
 
         multitask_pred = F.softmax(multitask_pred, dim=1)
         
         print(multitask_true)
         print(multitask_pred)
-        multitask_true = multitask_true.cpu().numpy()
-        multitask_pred = multitask_pred.cpu().numpy()
+        #multitask_true = multitask_true.cpu().numpy()
+        #multitask_pred = multitask_pred.cpu().numpy()
+        multitask_true = multitask_true.numpy()
+        multitask_pred = multitask_pred.numpy()
         precision_m, recall_m, thresholds_m = precision_recall_curve(multitask_true , multitask_pred[:,1])
         pr_auc_m = auc(recall_m, precision_m)
 
@@ -932,7 +921,15 @@ class LitGNN(pl.LightningModule):
         self.log("19_auc_mul", mul_auc_score, on_epoch=True, prog_bar=True, logger=True)
         self.log("20_mul_mat_score", mul_mat_score, on_epoch=True, prog_bar=True, logger=True)
         self.log("21_pr_auc_m_line", pr_auc_m, on_epoch=True, prog_bar=True, logger=True)
-
+        new_row_mul = {
+            "f1":mul_f1,
+            "precision":mul_precision,
+            "recall":mul_recall,
+            "accuracy":mul_acc,
+            "auc":mul_auc_score,
+            "mat_score":mul_mat_score,
+            "pr_auc_m_line":pr_auc_m
+        }
         #self.f1thresh = ml.best_f1(multitask_true, [i[1] for i in multitask_pred])
         #self.res2mt = ml.get_metrics_logits(multitask_true, multitask_pred)
         #self.res2 = ml.get_metrics_logits(all_true, all_pred)
@@ -984,18 +981,34 @@ class LitGNN(pl.LightningModule):
         self.log("26_auc_las", mul_auc_score_las, on_epoch=True, prog_bar=True, logger=True)
         self.log("27_ma las", mul_mat_score_las, on_epoch=True, prog_bar=True, logger=True)
         self.log("28_pr_auc_m_las", pr_auc_las, on_epoch=True, prog_bar=True, logger=True)
-       
+        new_row_las = {
+            "f1":mul_f1_las,
+            "precision":mul_precision_las,
+            "recall":mul_recall_las,
+            "accuracy":mul_acc_las,
+            "auc":mul_auc_score_las,
+            "mat_score":mul_mat_score_las,
+            "pr_auc_m_line":pr_auc_las
+        }
+        metrics_df  = pd.concat([metrics_df, pd.DataFrame([new_row_line]), pd.DataFrame([new_row_method]),
+                                 pd.DataFrame([new_row_mul]), pd.DataFrame([new_row_las])], ignore_index=True)
+
+        # metrics_df = metrics_df.append(new_row_line, ignore_index=True)
+        # metrics_df = metrics_df.append(new_row_method, ignore_index=True)
+        # metrics_df = metrics_df.append(new_row_mul, ignore_index=True)
+        # metrics_df = metrics_df.append(new_row_las, ignore_index=True)
+
+        metrics_df.to_csv("./storage/processed/metrics/mlp_linevd_20epochs.csv", index=False)
+
         return
 
     def plot_pr_curve(self):
         """Plot Precision-Recall Curve for Positive Class (after test)."""
-        print("Plot pr curve")
         precision, recall, thresholds = precision_recall_curve(
             self.linevd_true, [i[1] for i in self.linevd_pred]
         )
         disp = PrecisionRecallDisplay(precision, recall)
         disp.plot()
-        #plt.show()
         return
 
     def configure_optimizers(self):
