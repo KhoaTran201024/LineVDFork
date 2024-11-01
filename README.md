@@ -1,42 +1,53 @@
-# LineVD
+# Setup instruction
 
-This repository provides the code for [LineVD: Statement-level Vulnerability Detection using Graph Neural Networks](https://arxiv.org/pdf/2203.05181.pdf). The environment can be built using [Singularity](https://sylabs.io/singularity/), or by following / following the commands in the Singularity file. To start, clone the repository and navigate to the root directory.
+# Virtual environment setup
 
-## Directory Structure
-
-```dir
-(main module) ├── sastvd
-              │   ├── codebert
-              │   ├── helpers
-              │   ├── ivdetect
-              │   ├── linevd
-              │   └── scripts
-              ├── storage
-(memoization) │   ├── cache
-(raw data)    │   ├── external
-(csvs)        │   ├── outputs
-(models)      │   └── processed
-(tests)       └── tests
+```python
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-## Training LineVD from scratch
+# Install packages
 
-Build and initialise environment and download dataset
-
-```sh
-sudo singularity build main.sif Singularity
-singularity run main.sif -p initialise
+```python
+pip install -r requirements.txt
 ```
 
-Feature extraction (Increase NUM_JOBS if running on HPC for speed up)
-
-```sh
-singularity exec main.sif python sastvd/scripts/prepare.py
-singularity exec main.sif python sastvd/scripts/getgraphs.py
+```python
+pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 ```
 
-Train model (Training takes around 1-2 hours using GTX 3060)
+# Data setup
 
-```sh
-singularity exec --nv main.sif python sastvd/scripts/train_best.py
+1. **Download from google drive the link**
+[https://drive.google.com/drive/folders/1MOwFXA9mtj0lVOT3v0SHXYMlNG234ETC?usp=sharing](https://drive.google.com/drive/folders/1MOwFXA9mtj0lVOT3v0SHXYMlNG234ETC?usp=sharing)
+2. **Unzip all the zip files in the directory**
+
+After unzip the storage directory looks like the below image:
+
+![image.png](./media/image.png)
+
+
+The cache directory looks like this:
+
+![image.png](./media/image_1.png)
+
+# Training model
+
+Notice there are some error in this step like the python ***can not identify custom module.***
+
+The solution is to open terminal and **activate virtual environment again**
+
+```python
+source venv/bin/activate
+```
+
+Change to the running directory:
+
+```python
+cd sastvd/scripts
+```
+
+```python
+python sastvd/scripts/main.py
 ```

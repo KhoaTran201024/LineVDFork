@@ -4,10 +4,10 @@ from ray.tune.integration.pytorch_lightning import (
     TuneReportCallback,
     TuneReportCheckpointCallback,
 )
-
+from pytorch_lightning.callbacks import EarlyStopping
 
 def train_linevd(                                   #fix some bugs here
-    config, savepath, samplesz=-1, max_epochs=1, num_gpus=0, checkpoint_dir=None
+    config, savepath, samplesz=-1, max_epochs=1, num_gpus=1, checkpoint_dir=None
 ):
     print("ENTER TRAIN_LINEVD FUNCTION")
     """Wrap Pytorch Lightning to pass to RayTune."""
@@ -59,7 +59,9 @@ def train_linevd(                                   #fix some bugs here
 
     trainer = pl.Trainer(
         #devices=0,  # Use 'devices' in newer versions, set to '0' for CPU
-        accelerator="cpu",  # Explicitly specify using CPU
+	#gpus=1,
+        devices=1, 
+        accelerator="gpu",  # auto choose cpu or gpu
         #auto_lr_find=False,
         default_root_dir=savepath,
         num_sanity_val_steps=0,
