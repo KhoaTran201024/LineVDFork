@@ -2,12 +2,13 @@ import os
 import time
 from glob import glob
 from pathlib import Path
-
+import sys
+sys.path.append('')
 import pandas as pd
 import pytorch_lightning as pl
 import sastvd as svd
-import sastvd.linevd as lvd
-from ray.tune import Analysis
+import sastvd.linevd.__init__1 as lvd
+from ray.tune import ExperimentAnalysis
 
 
 def main(config, df):
@@ -53,7 +54,7 @@ def main(config, df):
                 # Load model and test
                 model = lvd.LitGNN()
                 model = lvd.LitGNN.load_from_checkpoint(chkpt, strict=False)
-                trainer = pl.Trainer(gpus=1, default_root_dir="/tmp/")
+                trainer = pl.Trainer(gpus=0, default_root_dir="/tmp/")
                 trainer.test(model, data)
                 res = [
                     row.trial_id,
@@ -85,7 +86,7 @@ if __name__ == "__main__":
             # Load full dataframe
             df_list = []
             for d in tune_dirs:
-                df_list.append(Analysis(d).dataframe())
+                df_list.append(ExperimentAnalysis(d).dataframe())
             df = pd.concat(df_list)
 
             # Get configurations

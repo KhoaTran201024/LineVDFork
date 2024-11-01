@@ -7,7 +7,7 @@ import sastvd.helpers.datasets as svdd
 import sastvd.helpers.dclass as svddc
 import sastvd.helpers.hljs as hljs
 import sastvd.helpers.rank_eval as svdhr
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__1 as lvd
 import torch as th
 from ray.tune import Analysis
 from tqdm import tqdm

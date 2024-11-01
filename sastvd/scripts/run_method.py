@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import pytorch_lightning as pl
 import sastvd as svd
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__1 as lvd
 from ray import tune
 from ray.tune.integration.pytorch_lightning import (
     TuneReportCallback,

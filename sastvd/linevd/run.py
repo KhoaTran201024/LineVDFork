@@ -1,5 +1,5 @@
 import pytorch_lightning as pl
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__ as lvd
 from ray.tune.integration.pytorch_lightning import (
     TuneReportCallback,
     TuneReportCheckpointCallback,
@@ -29,7 +29,6 @@ def train_linevd(                                   #fix some bugs here
         lstm_layers = 2,  # Number of LSTM layers
         lstm_dropout= 0.2,  # Dropout rate for LSTM
     )
-
     # Load data
     data = lvd.BigVulDatasetLineVDDataModule(
         batch_size=config["batch_size"],
@@ -42,7 +41,7 @@ def train_linevd(                                   #fix some bugs here
     )
     print("LINE 41 TRAINER")
     # # Train model
-    checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="val_loss")
+    checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="val_loss",save_top_k = -1)
     metrics = ["train_loss", "val_loss", "val_auroc"]
     #raytune_callback  = TuneReportCheckpointCallback(metrics, on="validation_end")
     #raytune_callback = TuneReportCallback(metrics, on="validation_end")
@@ -57,6 +56,7 @@ def train_linevd(                                   #fix some bugs here
     # )
     # Initialize the PyTorch Lightning Trainer
     #lastest version update
+
     trainer = pl.Trainer(
         #devices=0,  # Use 'devices' in newer versions, set to '0' for CPU
         accelerator="cpu",  # Explicitly specify using CPU
@@ -66,5 +66,7 @@ def train_linevd(                                   #fix some bugs here
         callbacks=[checkpoint_callback, rtckpt_callback],
         max_epochs=max_epochs,
     )
+
     print("LINE 57 run.py")
-    trainer.fit(model, data)
+    trainer.fit(model,data,ckpt_path="/home/teamq-g2-no2/testauto/LineVDFork/storage/processed/raytune_best_-1/202410292030_e715a0c_happy_happy/lightning_logs/version_0/checkpoints/epoch=1-step=31388.ckpt")
+    trainer.test(ckpt_path="best",datamodule=data)

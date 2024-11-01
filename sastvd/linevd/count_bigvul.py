@@ -1,6 +1,6 @@
 import pandas as pd
 import sastvd as svd
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__1 as lvd
 from tqdm import tqdm
 
 if __name__ == "__main__":

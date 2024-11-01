@@ -38,6 +38,7 @@ def rats(code: str):
     ret = svd.subprocess_cmd(cmd)[0].decode()
     os.remove(savefile)
     records = []
+    print(f"Line 41 {ret}")
     tree = cElementTree.ElementTree(cElementTree.fromstring(ret))
     for i in tree.findall("./vulnerability"):
         item = {"sast": "rats"}
@@ -78,7 +79,11 @@ def cppcheck(code: str):
 
 def run_sast(code: str, verbose: int = 0):
     rflaw = flawfinder(code)
+
+    print(f"Line 83 {rflaw}\n")
     rrats = rats(code)
+    print(rrats)
+    print(f"Debug: Received XML: {rrats[:500]}")  # Print the first 500 characters
     rcpp = cppcheck(code)
     if verbose > 0:
         svd.debug(

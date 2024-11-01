@@ -2,7 +2,7 @@ from importlib import reload
 
 import sastvd.helpers.dclass as svddc
 import sastvd.helpers.joern as svdj
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__1 as lvd
 from graphviz import Digraph
 
 reload(svdj)

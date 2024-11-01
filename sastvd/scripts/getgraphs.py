@@ -1,7 +1,7 @@
 import os
 import pickle as pkl
 import sys
-
+sys.path.append('')
 import numpy as np
 import sastvd as svd
 import sastvd.helpers.datasets as svdd

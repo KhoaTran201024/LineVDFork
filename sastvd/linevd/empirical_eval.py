@@ -7,7 +7,7 @@ import pandas as pd
 import pytorch_lightning as pl
 import sastvd as svd
 import sastvd.helpers.dclass as svddc
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__1 as lvd
 import sastvd.linevd.c_builtins as cbuiltin
 from ray.tune import Analysis
 from tqdm import tqdm

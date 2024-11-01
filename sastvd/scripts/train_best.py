@@ -17,29 +17,29 @@ os.environ['RAY_memory_usage_threshold'] = '0.9'
 # Disable worker killing by setting the refresh interval to zero
 os.environ['RAY_memory_monitor_refresh_ms'] = '0'
 
-ray.init(num_cpus=8, num_gpus=0)
+ray.init(num_cpus=8, num_gpus=0, runtime_env={"env_vars": {"PL_DISABLE_FORK": "1"}})
 config = {
     "hfeat": tune.choice([512]),
     "embtype": tune.choice(["codebert"]),
     "stmtweight": tune.choice([1]),
     "hdropout": tune.choice([0.3]),
     "gatdropout": tune.choice([0.2]),
-    "modeltype": tune.choice(["gat2layer"]),
-    "gnntype": tune.choice(["gat"]),
+    "modeltype": tune.choice(["mlponly"]),
+    "gnntype": tune.choice(["gat2layer"]),
     "loss": tune.choice(["ce"]),
     "scea": tune.choice([0.5]),
     "gtype": tune.choice(["pdg+raw"]),
     "batch_size": tune.choice([32]),
     "multitask": tune.choice(["linemethod"]),
     "splits": tune.choice(["default"]),
-    "lr": tune.choice([1e-3]),#
+    "lr": tune.choice([1e-4]),#
 }
 
 samplesz = -1
 run_id = sastvd.get_run_id()
 sp = sastvd.get_dir(sastvd.processed_dir() / f"raytune_best_{samplesz}" / run_id)
 trainable = tune.with_parameters(
-    lvdrun.train_linevd, max_epochs=1, samplesz=samplesz, savepath=sp
+    lvdrun.train_linevd, max_epochs=50, samplesz=samplesz, savepath=sp
 )
 
 analysis = tune.run(

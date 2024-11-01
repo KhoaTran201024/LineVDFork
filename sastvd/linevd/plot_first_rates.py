@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pytorch_lightning as pl
 import sastvd as svd
-import sastvd.linevd as lvd
+import sastvd.linevd.__init__1 as lvd
 import seaborn as sns
 from ray.tune import Analysis
 
