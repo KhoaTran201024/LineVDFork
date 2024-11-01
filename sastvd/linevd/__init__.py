@@ -771,118 +771,10 @@ class LitGNN(pl.LightningModule):
         self.all_pred_f = all_pred_f
         self.all_true_f = all_true_f
 
-<<<<<<< HEAD
-=======
-
         all_pred = all_pred.cpu().numpy()
         all_true = all_true.cpu().numpy()
-        precision_l, recall_l, thresholds_l = precision_recall_curve(all_true, all_pred[:,1])
-        pr_auc_l = auc(recall_l, precision_l)
-        best_f1_l = ml.best_f1(all_true, [i[1] for i in all_pred])
-        pred_l = [1 if i > best_f1_l else 0 for i in all_pred[:,1]]
-        #get metrics from the line level
-        line_f1 = f1_score(all_true, pred_l)
-        line_precision = precision_score(all_true, pred_l)
-        line_recall = recall_score(all_true, pred_l)
-        line_acc = accuracy_score(all_true, pred_l)
-        line_auc_score = roc_auc_score(all_true, pred_l)
-        line_mat_score = matthews_corrcoef(all_true, pred_l)
 
 
-        #print(line)
-        print(line_f1)
-        print(line_precision)
-        print(line_recall)
-        #Log the metrics line level
-        self.log("1_test_f1_line", line_f1, on_epoch=True, prog_bar=True, logger=True)
-        self.log("2_test_precision_line", line_precision, on_epoch=True, prog_bar=True, logger=True)
-        self.log("3_test_recall_line", line_recall, on_epoch=True, prog_bar=True, logger=True)
-        self.log("4_test_acc_line", line_acc, on_epoch=True, prog_bar=True, logger=True)
-        self.log("5_test_acu_line", line_auc_score, on_epoch=True, prog_bar=True, logger=True)
-        self.log("6_test_mat_line", line_mat_score, on_epoch=True, prog_bar=True, logger=True)
-        self.log("7_pr_auc_l_line", pr_auc_l, on_epoch=True, prog_bar=True, logger=True)
-        new_row_line = {
-            "f1":line_f1,
-            "precision":line_precision,
-            "recall":line_recall,
-            "accuracy":line_acc,
-            "auc":line_auc_score,
-            "mat_score":line_mat_score,
-            "pr_auc_m_line":pr_auc_l
-        }
-        all_pred_f = all_pred_f.cpu().numpy()
-        all_true_f = all_true_f.cpu().numpy()
-        precision_f, recall_f, thresholds_f = precision_recall_curve(all_true_f, all_pred_f[:,1])
-        pr_auc_f = auc(recall_f, precision_f)
-
-        best_f1_f = ml.best_f1(all_true_f, [i[1] for i in all_pred_f])
-        pred_f = [1 if i > best_f1_f else 0 for i in all_pred_f[:,1]]
-
-        #get metrics from method level
-        method_f1 = f1_score(all_true_f, pred_f)
-        method_precision = precision_score(all_true_f, pred_f)
-        method_recall = recall_score(all_true_f, pred_f)
-        method_acc = accuracy_score(all_true_f, pred_f)
-        method_auc_score = roc_auc_score(all_true_f, pred_f)
-        method_mat_score = matthews_corrcoef(all_true_f, pred_f)
-        new_row_method = {
-            "f1":method_f1,
-            "precision":method_precision,
-            "recall":method_recall,
-            "accuracy":method_acc,
-            "auc":method_auc_score,
-            "mat_score":method_mat_score,
-            "pr_auc_m_line":pr_auc_f
-        }
-        #print(method_f1)
-        #print(method_precision)
-        #print(method_recall)
-        #method = ml.get_metrics_logits(all_true, all_pred)
-        #print(method)
-        #log metrics from method level
-        self.log("8_test_f1_method", method_f1, on_epoch=True, prog_bar=True, logger=True)
-        self.log("9_test_precision_method", method_precision, on_epoch=True, prog_bar=True, logger=True)
-        self.log("10_test_recall_method", method_recall, on_epoch=True, prog_bar=True, logger=True)
-        self.log("11_test_acc_method", method_acc, on_epoch=True, prog_bar=True, logger=True)
-        self.log("12_test_auc_method", method_auc_score, on_epoch=True, prog_bar=True, logger=True)
-        self.log("13_test_mat_score_method", method_mat_score, on_epoch=True, prog_bar=True, logger=True)
-        self.log("14_pr_auc_f_line", pr_auc_f, on_epoch=True, prog_bar=True, logger=True)
-
-        # Path to save CSV file
-        #csv_file = 'test_metrics.csv'
-        #file_exists = os.path.isfile(csv_file)
-
-        # Prepare the data for the CSV
-        #log_data = {
-        #    "test_f1_line": f1_line.item(),
-        #    "test_precision_line": precision_line.item(),
-        #    "test_recall_line": recall_line.item(),
-        #    "test_f1_method": f1_method.item(),
-        #    "test_precision_method": precision_method.item(),
-        #    "test_recall_method": recall_method.item(),
-        #}
-
-        # Write to CSV file
-        # Define the file path where you want to save the CSV
-        #file_path = "./storage/processed/test_result/metrics.csv"
-    
-        # Check if file exists
-        #if not os.path.exists(file_path):
-        #    df = pd.DataFrame(columns=metrics.keys())
-        #    df.to_csv(file_path, index=False)
-
-        # Append the metrics to the CSV
-        #df = pd.read_csv(file_path)
-        #df = df.append(metrics, ignore_index=True)
-        #df.to_csv(file_path, index=False)
-
-        # Custom ranked accuracy (inc negatives)
-        #self.res1 = ivde.eval_statements_list(all_funcs)
-
-        # Custom ranked accuracy (only positives)
-        #self.res1vo = ivde.eval_statements_list(all_funcs, vo=True, thresh=0)
-
->>>>>>> origin
         # Regular metric
         multitask_pred = []
         multitask_true = []
@@ -896,97 +788,47 @@ class LitGNN(pl.LightningModule):
         multitask_true = [int(x) for x in multitask_true]  # Convert float labels to int
         multitask_true = th.LongTensor(multitask_true).cpu()
         multitask_pred = th.Tensor(multitask_pred).cpu()
-<<<<<<< HEAD
 
-        # multitask_pred = F.softmax(multitask_pred, dim=1)
-        
-        # print(multitask_true)
-        # print(multitask_pred)
-        # multitask_true = multitask_true.numpy()
-        # multitask_pred = multitask_pred.numpy()
-=======
+        all_true = th.LongTensor(all_true).cpu()
+        all_pred = th.Tensor(all_pred).cpu()
 
-        multitask_pred = F.softmax(multitask_pred, dim=1)
-        
-        print(multitask_true)
-        print(multitask_pred)
-        #multitask_true = multitask_true.cpu().numpy()
-        #multitask_pred = multitask_pred.cpu().numpy()
-        multitask_true = multitask_true.numpy()
-        multitask_pred = multitask_pred.numpy()
-        precision_m, recall_m, thresholds_m = precision_recall_curve(multitask_true , multitask_pred[:,1])
-        pr_auc_m = auc(recall_m, precision_m)
+        all_true_f = th.LongTensor(all_true_f).cpu()
+        all_pred_f = th.Tensor(all_pred_f).cpu()
 
-        best_f1 = ml.best_f1(multitask_true, [i[1] for i in multitask_pred])
-        print(multitask_pred)
-        pred = [1 if i > best_f1 else 0 for i in multitask_pred[:,1]]
-        mul_f1 = f1_score(multitask_true, pred, zero_division=0)
-        mul_precision = precision_score(multitask_true, pred, zero_division=0)
-        mul_recall = recall_score(multitask_true, pred, zero_division=0)
-        mul_acc = accuracy_score(multitask_true, pred)
-        mul_auc_score = roc_auc_score(multitask_true, pred)
-        mul_mat_score = matthews_corrcoef(multitask_true, pred)
-        self.log("15_f1_mul", mul_f1, on_epoch=True, prog_bar=True, logger=True)
-        self.log("16_pre_mul", mul_precision, on_epoch=True, prog_bar=True, logger=True)
-        self.log("17_recall_mul", mul_recall, on_epoch=True, prog_bar=True, logger=True)
-        self.log("18_acc_mul", mul_acc, on_epoch=True, prog_bar=True, logger=True)
-        self.log("19_auc_mul", mul_auc_score, on_epoch=True, prog_bar=True, logger=True)
-        self.log("20_mul_mat_score", mul_mat_score, on_epoch=True, prog_bar=True, logger=True)
-        self.log("21_pr_auc_m_line", pr_auc_m, on_epoch=True, prog_bar=True, logger=True)
-        new_row_mul = {
-            "f1":mul_f1,
-            "precision":mul_precision,
-            "recall":mul_recall,
-            "accuracy":mul_acc,
-            "auc":mul_auc_score,
-            "mat_score":mul_mat_score,
-            "pr_auc_m_line":pr_auc_m
-        }
-        #self.f1thresh = ml.best_f1(multitask_true, [i[1] for i in multitask_pred])
-        #self.res2mt = ml.get_metrics_logits(multitask_true, multitask_pred)
-        #self.res2 = ml.get_metrics_logits(all_true, all_pred)
-        #self.res2f = ml.get_metrics_logits(all_true_f, all_pred_f)
-
-        # Ranked metrics
-        #rank_metrs = []
-        #rank_metrs_vo = []
-        #for af in all_funcs:
-        #    rank_metr_calc = svdr.rank_metr([i[1] for i in af[0]], af[1], 0)
-        #    if max(af[1]) > 0:
-        #        rank_metrs_vo.append(rank_metr_calc)
-        #    rank_metrs.append(rank_metr_calc)
-        #try:
-        #    self.res3 = ml.dict_mean(rank_metrs)
-        #except Exception as E:
-        #    print(E)
-        #    pass
-        #self.res3vo = ml.dict_mean(rank_metrs_vo)
->>>>>>> origin
-
-        # precision_m, recall_m, thresholds_m = precision_recall_curve(multitask_true , multitask_pred[:,1])
-        # pr_auc_m = auc(recall_m, precision_m)
-
-        # best_f1 = ml.best_f1(multitask_true, [i[1] for i in multitask_pred])
-        # print(multitask_pred)
-        # pred = [0 if i >= 0.5 else 1 for i in multitask_pred[:,1]]
-        # mul_f1 = f1_score(multitask_true, pred, zero_division=0)
-        # mul_precision = precision_score(multitask_true, pred, zero_division=0)
-        # mul_recall = recall_score(multitask_true, pred, zero_division=0)
-        # mul_acc = accuracy_score(multitask_true, pred)
-        # mul_auc_score = roc_auc_score(multitask_true, pred)
-        # mul_mat_score = matthews_corrcoef(multitask_true, pred)
-        # self.log("15_f1_mul", mul_f1, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("16_pre_mul", mul_precision, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("17_recall_mul", mul_recall, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("18_acc_mul", mul_acc, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("19_auc_mul", mul_auc_score, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("20_mul_mat_score", mul_mat_score, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("21_pr_auc_m_line", pr_auc_m, on_epoch=True, prog_bar=True, logger=True)
         res = ml.get_metrics_logits(multitask_true,multitask_pred)
+        res2 = ml.get_metrics_logits(all_true,all_pred)
+        res2f = ml.get_metrics_logits(all_true_f,all_pred_f)
+        
         print(res["f1"])
         print(res["prec"])
         print(res["rec"])
 
+        print(res2["f1"])
+        print(res2["prec"])
+        print(res2["rec"])
+
+        print(res2f["f1"])
+        print(res2f["prec"])
+        print(res2f["rec"])
+
+        new_row_line = {
+            "f1":res2["f1"],
+            "precision":res2["prec"],
+            "recall":res2["rec"],
+            "accuracy":res2["acc"],
+            "auc":res2["roc_auc"],
+            "mat_score":res2["mcc"],
+            "pr_auc_m_line":res2["pr_auc"]
+        }
+        new_row_func = {
+            "f1":res2f["f1"],
+            "precision":res2f["prec"],
+            "recall":res2f["rec"],
+            "accuracy":res2f["acc"],
+            "auc":res2f["roc_auc"],
+            "mat_score":res2f["mcc"],
+            "pr_auc_m_line":res2f["pr_auc"]
+        }
         new_row_mul = {
             "f1":res["f1"],
             "precision":res["prec"],
@@ -1007,27 +849,7 @@ class LitGNN(pl.LightningModule):
                     pred_method = 1
                     break
             method_level_pred.append(pred_method)
-        #metrics = ml.get_metrics(method_level_true, method_level_pred)
-<<<<<<< HEAD
-        # precision_las, recall_las, thresholds_las = precision_recall_curve(method_level_true ,method_level_pred)
-        # pr_auc_las = auc(recall_las, precision_las)
-        # best_f1_las = ml.best_f1(method_level_true, [i for i in method_level_pred])
-        
-        # pred_las = [1 if i > 0.5 else 0 for i in method_level_pred]
 
-        # mul_f1_las = f1_score(method_level_true, pred_las, zero_division=0)
-        # mul_precision_las = precision_score(method_level_true, pred_las, zero_division=0)
-        # mul_recall_las = recall_score(method_level_true, pred_las, zero_division=0)
-        # mul_acc_las = accuracy_score(method_level_true, pred_las)
-        # mul_auc_score_las = roc_auc_score(method_level_true, pred_las)
-        # mul_mat_score_las = matthews_corrcoef(method_level_true, pred_las)
-        # self.log("22_f1_las", mul_f1_las, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("23_pre_las", mul_precision_las, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("24_recall_las", mul_recall_las, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("25_acc_las", mul_acc_las, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("26_auc_las", mul_auc_score_las, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("27_ma las", mul_mat_score_las, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("28_pr_auc_m_las", pr_auc_las, on_epoch=True, prog_bar=True, logger=True)
         res1 = ml. get_metrics(method_level_true,method_level_pred)
         print(res1["f1"])
         print(res1["prec"])
@@ -1041,40 +863,11 @@ class LitGNN(pl.LightningModule):
             "mat_score":res1["mcc"],
             "pr_auc_m_line":-1
         }
-        metrics_df  = pd.concat([metrics_df, pd.DataFrame([new_row_mul]), pd.DataFrame([new_row_las])], ignore_index=True)
 
-        metrics_df.to_csv("/home/teamq-g2-no2/testauto/LineVDFork/storage/processed/metrics/reimplement.csv", index=False)
-=======
-        precision_las, recall_las, thresholds_las = precision_recall_curve(method_level_true ,method_level_pred)
-        pr_auc_las = auc(recall_las, precision_las)
-        best_f1_las = ml.best_f1(method_level_true, [i for i in method_level_pred])
-        
-        pred_las = [1 if i > best_f1_las else 0 for i in method_level_pred]
 
-        mul_f1_las = f1_score(method_level_true, pred_las, zero_division=0)
-        mul_precision_las = precision_score(method_level_true, pred_las, zero_division=0)
-        mul_recall_las = recall_score(method_level_true, pred_las, zero_division=0)
-        mul_acc_las = accuracy_score(method_level_true, pred_las)
-        mul_auc_score_las = roc_auc_score(method_level_true, pred_las)
-        mul_mat_score_las = matthews_corrcoef(method_level_true, pred_las)
-        self.log("22_f1_las", mul_f1_las, on_epoch=True, prog_bar=True, logger=True)
-        self.log("23_pre_las", mul_precision_las, on_epoch=True, prog_bar=True, logger=True)
-        self.log("24_recall_las", mul_recall_las, on_epoch=True, prog_bar=True, logger=True)
-        self.log("25_acc_las", mul_acc_las, on_epoch=True, prog_bar=True, logger=True)
-        self.log("26_auc_las", mul_auc_score_las, on_epoch=True, prog_bar=True, logger=True)
-        self.log("27_ma las", mul_mat_score_las, on_epoch=True, prog_bar=True, logger=True)
-        self.log("28_pr_auc_m_las", pr_auc_las, on_epoch=True, prog_bar=True, logger=True)
-        new_row_las = {
-            "f1":mul_f1_las,
-            "precision":mul_precision_las,
-            "recall":mul_recall_las,
-            "accuracy":mul_acc_las,
-            "auc":mul_auc_score_las,
-            "mat_score":mul_mat_score_las,
-            "pr_auc_m_line":pr_auc_las
-        }
-        metrics_df  = pd.concat([metrics_df, pd.DataFrame([new_row_line]), pd.DataFrame([new_row_method]),
-                                 pd.DataFrame([new_row_mul]), pd.DataFrame([new_row_las])], ignore_index=True)
+        metrics_df  = pd.concat([pd.DataFrame([new_row_line]),pd.DataFrame([new_row_func]),
+                                 pd.DataFrame([new_row_mul]), pd.DataFrame([new_row_las])], 
+                                 ignore_index=True)
 
         # metrics_df = metrics_df.append(new_row_line, ignore_index=True)
         # metrics_df = metrics_df.append(new_row_method, ignore_index=True)
@@ -1082,7 +875,6 @@ class LitGNN(pl.LightningModule):
         # metrics_df = metrics_df.append(new_row_las, ignore_index=True)
 
         metrics_df.to_csv("./storage/processed/metrics/mlp_linevd_20epochs.csv", index=False)
->>>>>>> origin
 
         return
 

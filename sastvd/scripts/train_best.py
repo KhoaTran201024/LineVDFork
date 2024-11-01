@@ -32,14 +32,14 @@ config = {
     "batch_size": tune.choice([32]),
     "multitask": tune.choice(["linemethod"]),
     "splits": tune.choice(["default"]),
-    "lr": tune.choice([1e-4]),#
+    "lr": tune.choice([3e-4]),#
 }
 
 samplesz = -1
 run_id = sastvd.get_run_id()
 sp = sastvd.get_dir(sastvd.processed_dir() / f"raytune_best_{samplesz}" / run_id)
 trainable = tune.with_parameters(
-    lvdrun.train_linevd, max_epochs=50, samplesz=samplesz, savepath=sp
+    lvdrun.train_linevd, max_epochs=5, samplesz=samplesz, savepath=sp
 )
 
 analysis = tune.run(

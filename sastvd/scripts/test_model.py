@@ -28,7 +28,7 @@ config = {
 }
 # Load the model from the checkpoint
 model = lvds.LitGNN.load_from_checkpoint(
-    checkpoint_path="/home/teamq-g2-no2/testauto/LineVDFork/storage/processed/raytune_best_-1/selectedgat2layers50/lightning_logs/version_0/checkpoints/epoch=47-step=753312.ckpt",
+    checkpoint_path="/home/teamq-g2-no2/testauto/LineVDFork/storage/processed/raytune_best_-1/selectedgat2layers50/lightning_logs/version_0/checkpoints/epoch=7-step=125552.ckpt",
     hparams_file="/home/teamq-g2-no2/testauto/LineVDFork/storage/processed/raytune_best_-1/selectedgat2layers50/lightning_logs/version_0/hparams.yaml",
     map_location=None,
 )
