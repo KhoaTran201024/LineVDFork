@@ -45,7 +45,7 @@ trainable = tune.with_parameters(
 
 analysis = tune.run(
         trainable,
-        resources_per_trial={"cpu": 6, "gpu": 0.5},
+        resources_per_trial={"cpu": 8, "gpu": 0},
         metric="val_loss",
         mode="min",
         config=config,
